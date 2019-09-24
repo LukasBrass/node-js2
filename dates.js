@@ -1,26 +1,54 @@
-const MongoClient = require('mongodb').MongoClient;
-const assert = require('assert');
+const MongoClient = require("mongodb").MongoClient;
+const assert = require("assert");
 
-  module.exports = (async function() {
-  // Connection URL
-  const url = 'mongodb://127.0.0.1:27017/';
-  // Database Name
-  const dbName = 'node-app';
-  const client = new MongoClient(url);
+module.exports.addDates = async function(dateList) {
+  return new Promise((resolve, reject) => {
+    // Connection URL
+    const url = "mongodb://127.0.0.1:27017/";
+    // Database Name
+    const dbName = "node-app";
+    const client = new MongoClient(url);
+    try {
+      // Use connect method to connect to the Server
+      client.connect().then(() => {
+        const db = client.db(dbName);
+        const col = db.collection("dates");
+        col
+          .insertMany(dateList)
+          .then(result => resolve(true))
+          .catch(error => reject(error));
+      });
+    } catch {
+      client.close();
+      reject(false);
+    }
+  });
+};
 
-  try {
-    // Use connect method to connect to the Server
-    await client.connect();
+module.exports.listDates = async function() {
+  return new Promise((resolve, reject) => {
+    // Connection URL
+    const url = "mongodb://127.0.0.1:27017/";
+    // Database Name
+    const dbName = "node-app";
+    const client = new MongoClient(url);
 
-    const db = client.db(dbName);
-    const col = db.collection('dates');
-    let r = await col.insertMany([{ date: new Date() }]);
-
-    const docs = await col.find().toArray();
-    console.log(docs);
-  } catch (err) {
-    console.log(err.stack);
-  }
-
-  client.close();
-})();
+    try {
+      // Use connect method to connect to the Server
+      client.connect().then(() => {
+        const db = client.db(dbName);
+        const col = db.collection("dates");
+        col
+          .find()
+          .toArray()
+          .then(result => {
+            resolve(result);
+          })
+          .catch(error => reject(error));
+      });
+    } catch (err) {
+      client.close();
+      reject(false);
+    }
+  });
+};
